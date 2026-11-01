@@ -850,7 +850,7 @@ def node_power(filt_power: dict, em: EnergyModel, bw: dict) -> dict:
 
 def latency_budget(window_s: float, classify_ms: float, tx_ms: float, fes_ms: float) -> list[dict]:
     """Sequential stages from intent onset to muscle response (ms)."""
-    stages = [("Biological intent window", window_s * 1e3, "biology"),
+    stages = [("Decoder window (brain activity)", window_s * 1e3, "biology"),
               ("CSP + LDA classification", classify_ms, "silicon"),
               ("EQS-HBC frame transmission", tx_ms, "silicon"),
               ("FES actuator delay", fes_ms, "actuation")]

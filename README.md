@@ -43,6 +43,9 @@ Every number on the dashboard comes from the engine as it runs: operation counts
 pip install -r requirements.txt
 streamlit run app.py          # dashboard
 python bci_core.py --plot     # engine self-checks + phase1_check.png
+
+# documentary motion graphics (needs manim + Source Sans 3 / Source Code Pro)
+cd motion && manim -r 1920,1080 --fps 24 -a bdn04_motion.py
 ```
 
 Tested on Python 3.13. Every pinned package also ships wheels for Python 3.12.

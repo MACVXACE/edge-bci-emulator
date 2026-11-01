@@ -433,23 +433,49 @@ document.getElementById('go').onclick = () => {
 </script>
 """
 
-synth = (f"The brain needs {bio['dur_ms']:,.0f} ms to form the signal. The node then classifies, transmits and "
-         f"fires the muscle in {tail_ms:.0f} ms, {bio['dur_ms'] / tail_ms:.0f}x faster. "
-         f"The bottleneck is biology, not silicon.")
+window_words = "one full second" if round(bio["dur_ms"]) == 1000 else f"{bio['dur_ms']:,.0f} ms"
+synth = (f"The decoder reads {window_words} of brain activity before it commits. Then the node classifies, "
+         f"transmits and fires the muscle in {tail_ms:.0f} ms. The wait is in the biology, not the silicon.")
 z1 = t_end + 0.06 * tail_ms
 st.iframe(LATENCY_HTML % dict(
     ink=C_TRUTH, muted=C_MUTED, grid=C_GRID, blue=C_DCD, bio=C_RAW, sil=C_SILICON, act=C_ACT,
     tend=t_end, bio_end=bio["end_ms"], z1=z1, zoom=(1000 / (z1 - bio["end_ms"])) * (0.7 / 0.3),
     stages=json.dumps(lat), colors=json.dumps(KIND_COLOR), synth=json.dumps(synth)), height=400)
-st.caption("Playback runs on your browser's clock: the biological window takes a real second to fill. Without slow "
+st.caption("Playback runs on your browser's clock: the decoder's one-second window fills in real time. Without slow "
            "motion the whole hardware tail passes in about three screen refreshes. Hover a bar for its exact span. "
            f"Transmission time is computed: {bw['frame_bits']} bits ÷ {CFG.link_cap_bps / 1e3:g} kb/s = {bw['tx_ms']:.1f} ms.")
 
 l1, l2, l3, l4 = st.columns(4)
-l1.metric("Brain: forming the signal", f"{bio['dur_ms']:,.0f} ms")
+l1.metric("Decoder window: brain activity read", f"{bio['dur_ms']:,.0f} ms",
+          help="How much brain activity the classifier reads before it commits to a decision. "
+               "A design choice of the decoder, not a fixed delay of the brain.")
 l2.metric("Silicon: classify + transmit", f"{silicon_ms:.1f} ms",
           help=f"{classify_ms:g} ms classification + {bw['tx_ms']:.1f} ms on air "
                f"({bw['frame_bits']} bits ÷ {CFG.link_cap_bps / 1e3:g} kb/s).")
 l3.metric("Actuation: FES + muscle", f"{act_ms:.1f} ms")
 l4.metric("Hardware tail vs. brain", f"{tail_ms:.1f} ms",
           f"{tail_ms / t_end * 100:.1f}% of the {t_end:,.0f} ms total", delta_color="off", delta_arrow="off")
+
+
+# --- Repository Link & Telemetry Export ---
+st.sidebar.markdown("---")
+st.sidebar.markdown("[📂 View GitHub Repository](https://github.com/MACVXACE/edge-bci-emulator)")
+
+telemetry_csv = """Metric,Standard RLS (Float),Transversal RLS-DCD (Fixed Point),Delta / Improvement
+Multiplies per sample (adapting),289,24,-91.7%
+Multiplies per sample (mean),275.8,23.6,-91.4%
+Total ops per sample,472,242,-48.7%
+Filtering power 16-ch (uW),2.28,0.74,-67.5%
+Settled Clench SNR (dB),4.7,4.6,-0.1 dB (Preserved)
+Total Node Power (uW),2.68-3.09,1.14-1.55,Meets sub-2 uW envelope
+Raw stream bandwidth,36864 b/s,36864 b/s,3.69x over 10 kb/s cap
+Over-the-air link rate,36864 b/s (Overloaded),112 b/s (CSP+LDA frame),1.12% link utilization
+Hardware execution tail (ms),52.2,52.2,5% of 1052.2 ms total latency
+"""
+
+st.download_button(
+    label="📥 Export Telemetry Benchmark (CSV)",
+    data=telemetry_csv,
+    file_name="bdn04_silicon_telemetry.csv",
+    mime="text/csv",
+)

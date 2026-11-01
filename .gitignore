@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 phase1_check.png
 .DS_Store
+motion/media/
