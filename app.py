@@ -264,7 +264,7 @@ s2.metric("RLS-DCD SNR, clench / quiet",
           f"{snr['RLS-DCD']:.1f} / {snr_db(ref, dcd.out_uv, quiet):.1f} dB")
 s3.metric("Standard RLS SNR, clench / quiet",
           f"{snr['RLS']:.1f} / {snr_db(ref, rls.out_uv, quiet):.1f} dB")
-st.caption("The ground truth is passed through the same 1.3 Hz shift-add high-pass as the pipeline, since "
+st.caption("The ground truth is passed through the same 1.91 Hz shift-add high-pass as the pipeline, since "
            "anything below that is removed on purpose (motor-imagery features live in 8-30 Hz). "
            f"Raw input clipping: {burst.clipped['primary']} of {t.size} samples.")
 
